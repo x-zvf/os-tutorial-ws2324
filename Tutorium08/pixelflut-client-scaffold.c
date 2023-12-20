@@ -54,7 +54,6 @@ void flood(int fd, uint32_t const *argbbuf, int w, int h, int x, int y) {
 }
 
 int main(int argc, char *argv[]) {
-    // args: host, port file_path x y repeat
     if (argc != 7) {
         printf("Usage: %s hostip port file_path x y repeat\n", argv[0]);
         return 1;
@@ -66,7 +65,6 @@ int main(int argc, char *argv[]) {
     int y = atoi(argv[5]);
     int repeat = atoi(argv[6]);
 
-    // load image
     int width, height;
     uint32_t *argbbuf = get_pixelbuf(file_path, &width, &height);
     int fd = connect_to_server(host, port);
