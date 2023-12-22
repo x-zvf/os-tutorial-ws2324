@@ -41,16 +41,36 @@ uint32_t *get_pixelbuf(char *file_path, int *width, int *height) {
 }
 
 int connect_to_server(char *host, int port) {
-    // TODO: connect to server, return fd
+    int fd = socket(AF_INET, SOCK_STREAM, SOL_TCP);
+    if (fd < 0) {
+        printf("Error: cannot create socket\n");
+        exit(1);
+    }
+    struct sockaddr_in addr = {
+        .sin_family = AF_INET,
+        .sin_port = htons(port),
+    };
+    inet_pton(AF_INET, host, &addr.sin_addr);
+    if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        printf("Error: cannot connect to server\n");
+        exit(1);
+    }
+    return fd;
 }
 
 void flood(int fd, uint32_t const *argbbuf, int w, int h, int x, int y) {
-    //TODO: send pixels to server
-    //      The (w * h) image should appear at (x, y) on the server
-    //      argbbuf contains the loaded image in ARGB format (layed out 
-    //      row-by-row). For example, pixel (x=0, y=1) is at argbbuf[width].
-    //      If it were pure green, argbbuf[width] would be 0x__00ff00,
-    //      where __ is the alpha channel, which can be ignored.
+    //char buf[256];
+    for(int i = 0; i < h; i++) {
+        for(int j = 0; j < w; j++) {
+            uint32_t pixel = argbbuf[i * w + j];
+            int r = (pixel >> 16) & 0xff;
+            int g = (pixel >> 8) & 0xff;
+            int b = pixel & 0xff;
+            //int len = sprintf(buf, "PX %d %d %02x%02x%02x\n", x + j, y + i, r, g, b);
+            //write(fd, buf, len);
+            dprintf(fd, "PX %d %d %02x%02x%02x\n", x + j, y + i, r, g, b);
+        }
+    }
 }
 
 int main(int argc, char *argv[]) {
